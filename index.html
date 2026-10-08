@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a1128">
+<title>数饺子 · 入梦</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;overflow:hidden;}
+  body{
+    background:linear-gradient(to bottom,#0a1128 0%,#13203f 55%,#1a2a4d 100%);
+    font-family:"Songti SC","STSong","Noto Serif SC",serif;
+    cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;
+  }
+  #scene{position:fixed;inset:0;}
+
+  /* —— 夜幕加深层（第 20 只时淡入）—— */
+  #veil{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;
+    background:linear-gradient(to bottom,#05081a 0%,#0a1128 60%,#0e1730 100%);transition:opacity 9s ease;}
+
+  /* —— 星空 —— */
+  #stars{position:absolute;inset:0;z-index:2;}
+  .star{position:absolute;border-radius:50%;background:#dfe8ff;
+    animation:twinkle var(--d) ease-in-out var(--dl) infinite;transition:opacity 6s ease var(--td);}
+  @keyframes twinkle{0%,100%{opacity:.1}50%{opacity:.85}}
+  .star.dim{opacity:.06 !important;}
+  .shoot{position:absolute;width:90px;height:2px;border-radius:2px;z-index:2;pointer-events:none;
+    background:linear-gradient(to left,rgba(255,255,255,.7),transparent);}
+
+  /* —— 月亮 —— */
+  #moon{position:absolute;top:9vh;right:11vw;width:110px;height:110px;border-radius:50%;z-index:3;
+    background:radial-gradient(circle at 38% 34%,#fdf6e3,#ecdfc2 62%,#d9c9a4);
+    box-shadow:0 0 50px 18px rgba(253,246,227,.14),0 0 110px 40px rgba(253,246,227,.06);}
+  .eye{position:absolute;top:42px;width:11px;height:11px;border-radius:50%;background:#7a6a4d;
+    border-bottom:2.5px solid transparent;transition:all 1.2s ease;}
+  .eye.l{left:30px}.eye.r{right:30px}
+  .blush{position:absolute;top:58px;width:13px;height:6px;border-radius:50%;background:#e8c9a8;opacity:.4;}
+  .blush.l{left:18px}.blush.r{right:18px}
+  .mouth{position:absolute;top:66px;left:50%;transform:translateX(-50%);width:16px;height:8px;
+    border-bottom:2.5px solid #7a6a4d;border-radius:0 0 12px 12px;transition:height 1.2s ease;}
+  body.s1 #moon{animation:moonRoll 3.2s ease-in-out 1,moonBob 7s ease-in-out 3.4s infinite;}
+  @keyframes moonRoll{0%{transform:rotate(0)}25%{transform:rotate(-9deg)}55%{transform:rotate(5deg)}100%{transform:rotate(0)}}
+  @keyframes moonBob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+  body.s1 .eye{background:transparent;border-bottom-color:#7a6a4d;height:4px;border-radius:0 0 10px 10px;top:48px;}
+  body.s1 .mouth{height:5px;}
+  .zz{position:absolute;color:rgba(226,232,240,.5);font-size:15px;z-index:4;pointer-events:none;
+    animation:zzFloat 4.5s ease-out forwards;}
+  @keyframes zzFloat{0%{opacity:0;transform:translate(0,0) rotate(8deg)}25%{opacity:.6}
+    100%{opacity:0;transform:translate(26px,-70px) rotate(14deg)}}
+
+  /* —— 计数器 —— */
+  #counter{position:absolute;top:13vh;width:100%;text-align:center;z-index:5;
+    color:#e2e8f0;opacity:.6;font-size:24px;font-weight:300;letter-spacing:10px;padding-left:10px;transition:opacity 3s;}
+  #counter.pop{animation:cpop 1.8s ease-out;}
+  @keyframes cpop{0%{opacity:.15;transform:translateY(5px)}100%{opacity:.6;transform:none}}
+  #counter.quiet{opacity:.3;}
+
+  /* —— 锅 —— */
+  #potWrap{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);width:320px;z-index:6;}
+  .fireglow{position:absolute;bottom:-30px;left:50%;transform:translateX(-50%);width:270px;height:80px;
+    background:radial-gradient(ellipse at center,rgba(255,158,88,.18),transparent 70%);
+    filter:blur(10px);animation:firePulse 9s ease-in-out infinite;transition:opacity 6s;}
+  @keyframes firePulse{0%,100%{opacity:.4;transform:translateX(-50%) scale(1)}50%{opacity:.8;transform:translateX(-50%) scale(1.16)}}
+  #pot{position:relative;width:300px;height:118px;margin:0 auto;
+    background:linear-gradient(180deg,#414f66 0%,#2c3850 45%,#1f2939 100%);
+    border-radius:14px 14px 48% 48%/14px 14px 34px 34px;
+    box-shadow:0 16px 34px rgba(0,0,0,.45),inset 0 6px 10px rgba(255,255,255,.05);}
+  #water{position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:262px;height:42px;border-radius:50%;
+    background:radial-gradient(ellipse at 50% 32%,#3a5880,#22355c 62%,#1a2a4a);
+    box-shadow:inset 0 5px 14px rgba(0,0,0,.55),inset 0 -2px 6px rgba(140,180,255,.13),0 0 26px rgba(120,160,255,.10);
+    overflow:hidden;}
+  #water::after{content:'';position:absolute;top:8px;left:20%;width:60%;height:10px;border-radius:50%;
+    background:linear-gradient(90deg,transparent,rgba(170,200,255,.15),transparent);
+    animation:shine 7s ease-in-out infinite;}
+  @keyframes shine{0%,100%{transform:translateX(-14px)}50%{transform:translateX(14px)}}
+  .bubble{position:absolute;border:1px solid rgba(185,212,255,.4);border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.22),transparent 60%);}
+  /* 锅盖（终幕盖上） */
+  #lid{position:absolute;top:-16px;left:50%;transform:translate(-50%,-90px);width:312px;height:56px;z-index:7;
+    background:linear-gradient(180deg,#8a6f4d,#6d5637 70%,#54421f);border-radius:50%/50%;
+    box-shadow:0 8px 20px rgba(0,0,0,.5),inset 0 3px 6px rgba(255,235,200,.22);opacity:0;
+    transition:transform 2.4s cubic-bezier(.34,1.3,.5,1),opacity 1.6s;}
+  #lid::after{content:'';position:absolute;top:-9px;left:50%;transform:translateX(-50%);
+    width:34px;height:16px;border-radius:8px 8px 3px 3px;background:#9c7f57;}
+  #lid.on{opacity:1;transform:translate(-50%,0);}
+
+  /* —— 蒸汽 —— */
+  .steam{position:absolute;bottom:170px;left:50%;width:16px;height:95px;border-radius:50%;z-index:5;pointer-events:none;
+    background:linear-gradient(to top,rgba(255,255,255,.13),transparent);filter:blur(7px);opacity:0;
+    animation:steamRise 8s ease-in-out infinite;transition:opacity 5s;}
+  .steam.s2{margin-left:-52px;height:115px;animation-delay:2.6s;}
+  .steam.s3{margin-left:48px;height:72px;animation-delay:5.2s;}
+  @keyframes steamRise{
+    0%{transform:translate(-50%,24px) scaleY(.5);opacity:0}
+    25%{opacity:.5}
+    100%{transform:translate(calc(-50% + 14px),-130px) scaleY(1.35);opacity:0}
+  }
+  .steam.off{opacity:0 !important;animation-play-state:paused;}
+
+  /* —— 饺子 —— */
+  .jiaozi{position:absolute;width:44px;height:34px;z-index:8;pointer-events:none;
+    background:radial-gradient(ellipse at 50% 30%,#fdfbf3,#eae4d0 58%,#d9d0b8);
+    border-radius:48% 52% 50% 50%/68% 72% 40% 40%;
+    box-shadow:0 4px 14px rgba(0,0,0,.28),0 0 20px rgba(255,240,200,.13),inset -3px -4px 8px rgba(190,178,150,.4);}
+  .jiaozi::before{content:'';position:absolute;top:-7px;left:50%;transform:translateX(-50%);
+    width:34px;height:14px;background:linear-gradient(#f5efdc,#e5dcc2);border-radius:50% 50% 42% 42%;
+    box-shadow:inset 0 -2px 3px rgba(170,158,130,.5);}
+
+  /* —— 水波纹 —— */
+  .ripple{position:absolute;z-index:7;border:1.5px solid rgba(185,212,255,.5);border-radius:50%;
+    pointer-events:none;width:20px;height:7px;}
+
+  /* —— 提示 & 晚安 —— */
+  #hint{position:absolute;bottom:10px;width:100%;text-align:center;z-index:5;
+    color:rgba(226,232,240,.28);font-size:13px;letter-spacing:3px;transition:opacity 2s;}
+  #goodnight{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;
+    justify-content:center;align-items:center;gap:22px;opacity:0;pointer-events:none;
+    background:radial-gradient(ellipse at center,rgba(5,8,24,.28),rgba(5,8,24,.66));transition:opacity 6s ease;}
+  #goodnight.show{opacity:1;}
+  #goodnight .big{color:#e8e3d5;font-size:36px;font-weight:300;letter-spacing:14px;padding-left:14px;
+    text-shadow:0 0 30px rgba(232,227,213,.25);}
+  #goodnight .small{color:rgba(232,227,213,.4);font-size:13px;letter-spacing:5px;padding-left:5px;}
+  .sparkle{position:fixed;z-index:21;width:5px;height:5px;border-radius:50%;background:#e8e3d5;pointer-events:none;
+    animation:spk 2.4s ease-out forwards;}
+  @keyframes spk{0%{opacity:0;transform:scale(.3)}30%{opacity:.7;transform:scale(1)}100%{opacity:0;transform:scale(.2)}}
+</style>
+</head>
+<body>
+<div id="scene">
+  <div id="veil"></div>
+  <div id="stars"></div>
+  <div id="moon">
+    <div class="eye l"></div><div class="eye r"></div>
+    <div class="blush l"></div><div class="blush r"></div>
+    <div class="mouth"></div>
+  </div>
+  <div id="counter">第 1 只</div>
+  <div id="potWrap">
+    <div class="fireglow" id="fire"></div>
+    <div id="pot"><div id="water"></div></div>
+    <div id="lid"></div>
+    <div class="steam"></div><div class="steam s2"></div><div class="steam s3"></div>
+  </div>
+  <div id="hint">轻触屏幕 · 捞起一只热乎乎的饺子</div>
+</div>
+<div id="goodnight">
+  <div class="big">大困蛋，晚安</div>
+  <div class="small">饺子们都回锅里盖好被子了 · 好梦</div>
+</div>
+
+<script>
+(function(){
+  const $=s=>document.querySelector(s);
+  const state={count:0,stage:0,zzTimer:null,shootTimer:null};
+
+  /* ---------- 星空 ---------- */
+  const starsBox=$('#stars');
+  for(let i=0;i<95;i++){
+    const s=document.createElement('div');s.className='star';
+    const sz=Math.random()*1.8+0.8;
+    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*62}%;
+      --d:${(Math.random()*4+3).toFixed(1)}s;--dl:${(Math.random()*4).toFixed(1)}s;--td:${(Math.random()*5).toFixed(1)}s;`;
+    starsBox.appendChild(s);
+  }
+  function shootingStar(){
+    if(state.stage>=3) return;
+    const sh=document.createElement('div');sh.className='shoot';
+    const x=60+Math.random()*50,y=5+Math.random()*25;
+    sh.style.left=x+'vw';sh.style.top=y+'vh';
+    document.body.appendChild(sh);
+    sh.animate([{transform:'translate(0,0)',opacity:.7},{transform:'translate(-32vw,14vh)',opacity:0}],
+      {duration:1400,easing:'ease-in'}).finished.then(()=>sh.remove());
+    state.shootTimer=setTimeout(shootingStar,12000+Math.random()*18000);
+  }
+  state.shootTimer=setTimeout(shootingStar,6000);
+
+  /* ---------- 声音（全部合成，无音频文件） ---------- */
+  let AC=null,master=null,bubbleGain=null;
+  function initAudio(){
+    if(AC){ if(AC.state==='suspended') AC.resume(); return; }
+    AC=new (window.AudioContext||window.webkitAudioContext)();
+    master=AC.createGain();master.gain.value=.75;master.connect(AC.destination);
+    // 咕嘟水声：布朗噪声 + 低通 + 慢 LFO 起伏
+    const len=AC.sampleRate*2, buf=AC.createBuffer(1,len,AC.sampleRate), d=buf.getChannelData(0);
+    let last=0;
+    for(let i=0;i<len;i++){const w=Math.random()*2-1;last=(last+.02*w)/1.02;d[i]=last*3.5;}
+    const src=AC.createBufferSource();src.buffer=buf;src.loop=true;
+    const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=380;
+    bubbleGain=AC.createGain();bubbleGain.gain.value=.055;
+    const lfo=AC.createOscillator();lfo.frequency.value=.13;
+    const lg=AC.createGain();lg.gain.value=.03;
+    lfo.connect(lg);lg.connect(bubbleGain.gain);
+    src.connect(lp);lp.connect(bubbleGain);bubbleGain.connect(master);
+    src.start();lfo.start();
+  }
+  // 五声音阶：数到第几只就唱第几个音，怎么数都好听
+  const SCALE=[523.25,587.33,659.25,783.99,880.00,1046.50,1174.66,1318.51];
+  function ding(n){
+    if(!AC) return;
+    const f=SCALE[(n-1)%SCALE.length],t=AC.currentTime;
+    const o=AC.createOscillator(),g=AC.createGain();
+    const o2=AC.createOscillator(),g2=AC.createGain();
+    o.type='sine';o.frequency.value=f;
+    o2.type='sine';o2.frequency.value=f*2;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.15,t+.02);
+    g.gain.exponentialRampToValueAtTime(.0001,t+2.6);
+    g2.gain.setValueAtTime(0,t);g2.gain.linearRampToValueAtTime(.04,t+.02);
+    g2.gain.exponentialRampToValueAtTime(.0001,t+1.5);
+    o.connect(g);o2.connect(g2);g.connect(master);g2.connect(master);
+    o.start(t);o2.start(t);o.stop(t+2.7);o2.stop(t+1.6);
+  }
+  function lullaby(){ // 终幕小夜曲：下行五声琶音
+    if(!AC) return;
+    [783.99,659.25,587.33,523.25,392.00].forEach((f,i)=>{
+      const t=AC.currentTime+i*.55;
+      const o=AC.createOscillator(),g=AC.createGain();
+      o.type='sine';o.frequency.value=f;
+      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.12,t+.05);
+      g.gain.exponentialRampToValueAtTime(.0001,t+2.2);
+      o.connect(g);g.connect(master);o.start(t);o.stop(t+2.3);
+    });
+  }
+
+  /* ---------- 水泡 & 蒸汽节奏 ---------- */
+  const water=$('#water');
+  setInterval(()=>{
+    if(state.stage>=5) return;
+    const b=document.createElement('div');b.className='bubble';
+    const sz=Math.random()*16+7;
+    b.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*78+8}%;bottom:${Math.random()*8}px;`;
+    water.appendChild(b);
+    b.animate([{transform:'translateY(0) scale(.4)',opacity:0},{opacity:.55,offset:.3},
+      {transform:`translateY(-${28+Math.random()*14}px) scale(1)`,opacity:0}],
+      {duration:2600+Math.random()*1400,easing:'ease-out'}).finished.then(()=>b.remove());
+  },1100);
+
+  /* ---------- 计数 ---------- */
+  const counter=$('#counter');
+  function updateCounter(){
+    counter.textContent='第 '+state.count+' 只';
+    counter.classList.remove('pop');void counter.offsetWidth;counter.classList.add('pop');
+  }
+
+  /* ---------- 捞饺子：从锅里缓缓升起、轻晃、淡去 ---------- */
+  const potWrap=$('#potWrap');
+  function scoop(){
+    const pw=potWrap.getBoundingClientRect();
+    const j=document.createElement('div');j.className='jiaozi';
+    const sx=pw.left+pw.width/2-22+(Math.random()*90-45);
+    const sy=pw.top-30;
+    j.style.left=sx+'px';j.style.top=sy+'px';
+    document.body.appendChild(j);
+    const drift=Math.random()*80-40, rise=Math.min(innerHeight*.48,420);
+    j.animate([
+      {transform:'translate(0,0) rotate(0deg) scale(.85)',opacity:0},
+      {transform:'translate(0,-14px) rotate(-4deg) scale(1)',opacity:1,offset:.08},
+      {transform:`translate(${drift*.4}px,-${rise*.45}px) rotate(${drift>0?6:-6}deg) scale(1.02)`,opacity:1,offset:.55},
+      {transform:`translate(${drift}px,-${rise}px) rotate(0deg) scale(.92)`,opacity:0}
+    ],{duration:4600,easing:'cubic-bezier(.25,.46,.45,.94)'}).finished.then(()=>j.remove());
+    // 水波纹
+    const r=document.createElement('div');r.className='ripple';
+    r.style.left=(sx+12)+'px';r.style.top=(sy+18)+'px';
+    document.body.appendChild(r);
+    r.animate([{transform:'scale(.4)',opacity:.7},{transform:'scale(2.6)',opacity:0}],
+      {duration:1100,easing:'ease-out'}).finished.then(()=>r.remove());
+  }
+
+  /* ---------- 阶段里程碑 ---------- */
+  const hint=$('#hint');
+  function setStage(n){
+    state.stage=n;
+    if(n===1){ // 第 10 只：月亮睡着了
+      document.body.classList.add('s1');
+      counter.classList.add('quiet');
+      hint.textContent='月亮睡着了 · 轻一点…';
+      state.zzTimer=setInterval(()=>{
+        const z=document.createElement('span');z.className='zz';z.textContent='z';
+        const m=$('#moon').getBoundingClientRect();
+        z.style.left=(m.left+m.width*.82)+'px';z.style.top=(m.top+m.height*.18)+'px';
+        z.style.fontSize=(11+Math.random()*10).toFixed(0)+'px';
+        document.body.appendChild(z);setTimeout(()=>z.remove(),4600);
+      },2600);
+    }
+    if(n===2){ // 第 50 只：星星一颗颗犯困，天色渐深
+      $('#veil').style.opacity=.5;
+      const st=document.querySelectorAll('.star');
+      st.forEach((s,i)=>{ if(i%2===0) s.classList.add('dim'); });
+      if(bubbleGain) bubbleGain.gain.linearRampToValueAtTime(.035,AC.currentTime+5);
+      hint.textContent='星星一颗颗犯困了 · 天色也深了…';
+    }
+    if(n===3){ // 第 100 只：夜很深了，流星也不再划过
+      $('#veil').style.opacity=.8;
+      document.querySelectorAll('.star').forEach(s=>s.classList.add('dim'));
+      if(bubbleGain) bubbleGain.gain.linearRampToValueAtTime(.022,AC.currentTime+5);
+      hint.textContent='夜很深了 · 锅里的水声也轻了…';
+    }
+    if(n===4){ // 第 150 只：只剩最后一点星光
+      $('#veil').style.opacity=.95;
+      if(bubbleGain) bubbleGain.gain.linearRampToValueAtTime(.01,AC.currentTime+5);
+      hint.textContent='只剩最后一点星光了 · 快数完了…';
+    }
+    if(n===5){ finale(); }
+  }
+
+  /* ---------- 终幕：饺子回家 + 盖锅盖 + 晚安 ---------- */
+  function finale(){
+    clearInterval(state.zzTimer);clearTimeout(state.shootTimer);
+    counter.classList.add('quiet');counter.textContent='🌙 数完了';
+    hint.style.opacity=0;
+    // 三只饺子排着队跳回锅里
+    const pw=potWrap.getBoundingClientRect();
+    for(let i=0;i<3;i++){
+      setTimeout(()=>{
+        const j=document.createElement('div');j.className='jiaozi';
+        const x0=pw.left+pw.width/2+(i-1)*70-22;
+        j.style.left=x0+'px';j.style.top=(pw.top-190)+'px';
+        document.body.appendChild(j);
+        j.animate([
+          {transform:'translate(0,0) rotate(0)',opacity:0},
+          {transform:'translate(0,-26px) rotate(-14deg)',opacity:1,offset:.25},
+          {transform:`translate(${(pw.left+pw.width/2-22)-x0}px,${(pw.top-26)-(pw.top-190)}px) rotate(12deg)`,opacity:1,offset:.85},
+          {transform:`translate(${(pw.left+pw.width/2-22)-x0}px,${(pw.top-14)-(pw.top-190)}px) rotate(0)`,opacity:0}
+        ],{duration:1000,easing:'ease-in-out'}).finished.then(()=>j.remove());
+      },i*420);
+    }
+    setTimeout(()=>{ $('#lid').classList.add('on');               // 盖上锅盖
+      document.querySelectorAll('.steam').forEach(s=>s.classList.add('off'));
+      $('#fire').style.opacity=0;                                 // 熄火
+    },1500);
+    lullaby();
+    setTimeout(()=>$('#goodnight').classList.add('show'),2600);
+    if(master){ // 夜曲放完，声音也慢慢睡去
+      setTimeout(()=>{master.gain.linearRampToValueAtTime(.0001,AC.currentTime+7);},5000);
+    }
+  }
+
+  /* ---------- 点击 ---------- */
+  document.addEventListener('pointerdown',e=>{
+    initAudio();
+    if(state.stage>=5){ // 晚安之后：只剩一点点星光回应你，别吵醒月亮
+      const sp=document.createElement('div');sp.className='sparkle';
+      sp.style.left=(e.clientX-2)+'px';sp.style.top=(e.clientY-2)+'px';
+      document.body.appendChild(sp);setTimeout(()=>sp.remove(),2400);
+      return;
+    }
+    state.count++;
+    updateCounter();
+    ding(state.count);
+    scoop();
+    if(state.count===10) setStage(1);
+    else if(state.count===50) setStage(2);
+    else if(state.count===100) setStage(3);
+    else if(state.count===150) setStage(4);
+    else if(state.count===200) setStage(5);
+  });
+})();
+</script>
+</body>
+</html>
